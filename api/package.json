@@ -5,7 +5,7 @@
   "devDependencies": {},
   "scripts": {
     "start": "nodemon src/index.js",
-    "test": "jest --watchAll --verbose --detectOpenHandles"
+    "test": "jest --watchAll --detectOpenHandles"
   },
   "author": "Wouter Verthongen",
   "license": "MIT",
