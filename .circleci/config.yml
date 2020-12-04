@@ -10,7 +10,7 @@ jobs:
       - checkout
 
       - run: cd api && npm ci
-      - run: cd api && npm citest
+      - run: cd api && npm test
 
 
 
