@@ -14,8 +14,8 @@ jobs:
 
       - setup_remote_docker
 
+      - run: cd api
       - run:
-        cd api
         TAG="01.${CIRCLE_BUILD_NUM}"
         LATEST="latest"
         docker build -t wouwehb/ar-multiplatformtool_api:$TAG .
