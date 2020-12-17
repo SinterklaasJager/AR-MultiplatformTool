@@ -34,19 +34,17 @@ app.get('/test', (req, res) => {
   
 
   // async function initialiseTables() {
-  //   await pg.schema.hasTable('storyblock').then(async (exists) => {
+  //   await pg.schema.hasTable('users').then(async (exists) => {
   //     if (!exists) {
   //       await pg.schema
-  //         .createTable('storyblock', (table) => {
+  //         .createTable('users', (table) => {
   //           table.increments();
   //           table.uuid('uuid');
   //           table.string('content');
-  //           table.string('story_id');
-  //           table.integer('order');
   //           table.timestamps(true, true);
   //         })
   //         .then(async () => {
-  //           console.log('created table storyblock');
+  //           console.log('created table users');
   //         });
   
   //     }

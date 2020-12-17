@@ -12,5 +12,18 @@ jobs:
       - run: cd api && npm ci
       - run: cd api && npm test
 
+      - setup_remote_docker
+
+      - run:
+        cd api
+        TAG="01.${CIRCLE_BUILD_NUM}"
+        LATEST="latest"
+        docker build -t wouwehb/ar-multiplatformtool_api:$TAG .
+        docker login -u $DOCKER_LOGIN -p $DOCKER_PASSWORD
+        docker push wouwehb/ar-multiplatformtool_api:$TAG
+        docker tag wouwehb/ar-multiplatformtool_api:$TAG wouwehb/ar-multiplatformtool_api:$LATEST
+        docker push wouwehb/ar-multiplatformtool_api:$LATEST
+      
+
 
 
