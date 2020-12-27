@@ -23,6 +23,8 @@ jobs:
         docker push wouwehb/ar-multiplatformtool_api:$TAG
         docker tag wouwehb/ar-multiplatformtool_api:$TAG wouwehb/ar-multiplatformtool_api:$LATEST
         docker push wouwehb/ar-multiplatformtool_api:$LATEST
+        
+        docker run -d \ --name watchtower \ -v /var/run/docker.sock:/var/run/docker.sock \ containrrr/watchtower
       
 
 
