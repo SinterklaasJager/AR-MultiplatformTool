@@ -1,13 +1,14 @@
+const { v4: uuidv4 } = require('uuid');
+
 const Helpers = {
     generateUUID: () => {
-        const uuid = uuidv1();  
-        return uuid;
+     return uuidv4();  
+         
      },
     sum: (a,b) => { 
         return a+b;
      }
- 
- 
+
 }
 
 

@@ -6,14 +6,14 @@ const {
   doesNotMatch
 } = require('assert');
 
-const port = 3000
+const port = 3001
 
 
 const pg = require('knex')({
   client: 'pg',
   version: '9.6',
   searchPath: ['knex', 'public'],
-  connection: process.env.PG_CONNECTION_STRING ? process.env.PG_CONNECTION_STRING : 'postgres://example:example@localhost:5432/test'
+  connection: process.env.PG_CONNECTION_STRING ? process.env.PG_CONNECTION_STRING : 'postgres://example:example@localhost:5432/ARdb'
 });
 
 
@@ -108,6 +108,26 @@ app.get('/getGameById/:id', async (req, res) => {
     .from("games")
     .where({
       id: req.params.id
+    })
+  if (result.length < 1) {
+    res.status(404).send();
+  } else {
+    res.send(result)
+  }
+
+
+
+});
+
+//Get player by id
+
+app.get('/getPlayerById/:id', async (req, res) => {
+
+  const result = await pg
+    .select("*")
+    .from("games")
+    .where({
+      id: req.params.id
     }).then(async (data) => {
       if (data.length >= 1) {
         res.json({
@@ -121,33 +141,49 @@ app.get('/getGameById/:id', async (req, res) => {
 
 //Delete Game
 
-app.delete('/deleteGame/', async (req, res) => {
+app.delete('/deleteGame/:uuid', async (req, res) => {
 
   console.log("delete game");
 
-  if (req.body.hasOwnProperty('uuid')) {
-    const result = await pg.from("games").where({
-      uuid: req.body.uuid
-    }).del().then((data) => {
-      res.json(data);
-    }).catch(() => res.status(404).send());
-  } else {
-    res.status(404).send();
-  }
+
+  const result = await pg.from("games").where({
+    uuid: req.params.uuid
+  }).del().then((data) => {
+    res.json(data);
+  }).catch(() => res.status(404).send());
 
 });
 
-app.get('/getPlayerByID/', async (req, res) => {
-
-  console.log("get player by ID");
-
-
-});
 
 ///////////////////////////////
 //        Analyze Data       //
 ///////////////////////////////
 
+//Get player win rate above x%
+app.get('/getPlayerByWinPercent/percent', async (req, res) => {
+
+  const result = await pg
+    .select("Won_Games", "Played_Games")
+    .from("players")
+  
+      for (const percent of result) {
+        console.log(percent.Won_Games.length / percent.Played_Games.length);
+        const percentages = (percent.Won_Games.length / percent.Played_Games.length)*100;
+
+        if(percentages>=req.params.percent){
+          result.push 
+        }
+      }
+   
+
+
+});
+
+//get all games over time period
+
+//get all games with duration below x min
+
+//Check Player (id) cheater
 
 
 ///////////////////////////////
@@ -162,12 +198,22 @@ async function initialiseTables() {
         .createTable('players', (table) => {
           table.increments();
           table.uuid('uuid');
-          table.string('content');
+          table.string('Played_Games');
+          table.string("Won_Games");
           table.timestamps(true, true);
         })
         .then(async () => {
           console.log('created table players');
+          for (let i = 0; i < 10; i++) {
+            const uuid = Helpers.generateUUID();
+            await pg.table('players').insert({
+              uuid,
+              Played_Games: ["Game1", "Game2"],
+              Won_Games: ["Game1", "Game2"]
+            })
+          }
         });
+
 
     }
   });
@@ -181,6 +227,7 @@ async function initialiseTables() {
           table.string('players');
           table.string('winner');
           table.integer("rounds");
+          table.integer("duration");
           table.timestamps(true, true);
         })
         .then(async () => {
