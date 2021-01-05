@@ -24,7 +24,6 @@ http.Server(app);
 app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
-    // to support URL-encoded bodies
     extended: true
   })
 );
@@ -48,15 +47,9 @@ app.post('/addGame', async (req, res) => {
 
     console.log("Added a Game");
 
-    //  let checkContentLength = Helpers.checkContentLength(req.body.content, 100);
-    //  let checkContentType = Helpers.checkIfString(req.body.content);
-
-    //  if(!checkContentLength || !checkContentType) {
-    //    res.status(404).send() 
-    //  }else {
     const uuid = Helpers.generateUUID();
 
-    const result = await pg
+    const resultGames = await pg
       .table("games")
       .insert({
         uuid: uuid,
@@ -64,6 +57,7 @@ app.post('/addGame', async (req, res) => {
         players: req.body.players,
         winner: req.body.winner,
         rounds: req.body.rounds,
+        duration: req.body.rounds
       })
       .then(async function () {
         res.status(200).send();
@@ -72,20 +66,39 @@ app.post('/addGame', async (req, res) => {
         console.log(error);
       });
 
+      const resultPlayers = await pg
+      .table("players")
+      .where()
+      .insert({
+        uuid: uuid,
+        title: req.body.title,
+        players: req.body.players,
+        winner: req.body.winner,
+        rounds: req.body.rounds,
+        duration: req.body.rounds
+      })
+      .then(async function () {
+        res.status(200).send();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+      const resultWinner = await pg
+      .table("players")
+      .where({uuid:req.body.winner})
+      .then(async function () {
+        res.status(200).send();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
-  //  }
+  
+
+
 );
-
-
-
-//Get Records
-
-// table.uuid('uuid');
-// table.string('title');
-// table.string('players');
-// table.string('winner');
-// table.integer("rounds");
 
 
 app.get('/getAllGames', async (req, res) => {
@@ -99,11 +112,15 @@ app.get('/getAllGames', async (req, res) => {
 
 });
 
-//Get record by id
+
 
 app.get('/getGameById/:id', async (req, res) => {
-
-  const result = await pg
+if(req.params.id<0||req.params.id>100000000000){
+  res.send(400)
+}else if(!(Number.isInteger(req.params.id))){
+  res.send(400)
+}else{
+    const result = await pg
     .select("*")
     .from("games")
     .where({
@@ -114,12 +131,9 @@ app.get('/getGameById/:id', async (req, res) => {
   } else {
     res.send(result)
   }
-
-
-
+}
 });
 
-//Get player by id
 
 app.get('/getPlayerById/:id', async (req, res) => {
 
@@ -139,7 +153,6 @@ app.get('/getPlayerById/:id', async (req, res) => {
     });
 });
 
-//Delete Game
 
 app.delete('/deleteGame/:uuid', async (req, res) => {
 

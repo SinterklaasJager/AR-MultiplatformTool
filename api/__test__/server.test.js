@@ -1,6 +1,33 @@
 const supertest = require("supertest");
-const app = require("../server.js");
+const app = require("../src/server.js");
 const request = supertest(app);
+
+describe("Add a Game",()=>{
+
+});
+
+describe("get a game by ID", ()=>{
+    
+    test("between 0-1billion" ,  (done) =>{
+        try {
+            const response = await request.get('/getGameById/-500/')
+            expect(response.status).toBe(400)
+            done();
+        } catch (error) {
+            console.log(error)
+        }
+    })
+
+    test("is an integer" , async (done) =>{
+        try {
+            const response = await request.get('/getGameById/:somethinginthewayshemovesme/')
+            expect(response.status).toBe(400)
+            done();
+        } catch (error) {
+            console.log(error)
+        }
+    })
+})
 
 describe("Get Players by minimum win percentage",() =>{
     //percent must between 0 and 100
