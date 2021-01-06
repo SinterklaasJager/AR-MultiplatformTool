@@ -66,7 +66,7 @@ app.post('/addGame', async (req, res) => {
         console.log(error);
       });
 
-      const resultPlayers = await pg
+    const resultPlayers = await pg
       .table("players")
       .where()
       .insert({
@@ -84,9 +84,11 @@ app.post('/addGame', async (req, res) => {
         console.log(error);
       });
 
-      const resultWinner = await pg
+    const resultWinner = await pg
       .table("players")
-      .where({uuid:req.body.winner})
+      .where({
+        uuid: req.body.winner
+      })
       .then(async function () {
         res.status(200).send();
       })
@@ -95,7 +97,7 @@ app.post('/addGame', async (req, res) => {
       });
   }
 
-  
+
 
 
 );
@@ -115,23 +117,47 @@ app.get('/getAllGames', async (req, res) => {
 
 
 app.get('/getGameById/:id', async (req, res) => {
-if(req.params.id<0||req.params.id>100000000000){
-  res.send(400)
-}else if(!(Number.isInteger(req.params.id))){
-  res.send(400)
-}else{
-    const result = await pg
-    .select("*")
-    .from("games")
-    .where({
-      id: req.params.id
-    })
-  if (result.length < 1) {
-    res.status(404).send();
-  } else {
-    res.send(result)
+
+  let canPass = true;
+  let id = parseInt(req.params.id);
+
+  console.log(id);
+
+ 
+
+  if (!Number.isInteger(id)) {
+    canPass = false
   }
-}
+
+  if (id < 0 || id > 100000000000) {
+  
+    canPass = false
+  }
+
+  
+
+  if (canPass) {
+  
+    try {
+      const result = await pg
+        .select("*")
+        .from("games")
+        .where({
+          id: id
+        })
+      if (result.length < 1) {
+        res.status(404).send();
+      } else {
+        res.send(result)
+      }
+    } catch (error) {
+      res.send(error);
+    }
+
+  } else {
+    console.log("Can Pass = " + canPass);
+    res.status(400).send();
+  }
 });
 
 
@@ -178,16 +204,16 @@ app.get('/getPlayerByWinPercent/percent', async (req, res) => {
   const result = await pg
     .select("Won_Games", "Played_Games")
     .from("players")
-  
-      for (const percent of result) {
-        console.log(percent.Won_Games.length / percent.Played_Games.length);
-        const percentages = (percent.Won_Games.length / percent.Played_Games.length)*100;
 
-        if(percentages>=req.params.percent){
-          result.push 
-        }
-      }
-   
+  for (const percent of result) {
+    console.log(percent.Won_Games.length / percent.Played_Games.length);
+    const percentages = (percent.Won_Games.length / percent.Played_Games.length) * 100;
+
+    if (percentages >= req.params.percent) {
+      result.push
+    }
+  }
+
 
 
 });
@@ -195,6 +221,30 @@ app.get('/getPlayerByWinPercent/percent', async (req, res) => {
 //get all games over time period
 
 //get all games with duration below x min
+app.get('/getGamesByDuration/:duration', async (req, res) => {
+
+  if (req.params.duration === "" || req.params.duration === null || req.params.duration != Number.isInteger) {
+    res.status(400);
+  } else {
+    const result = await pg
+      .select("*")
+      .from("games")
+      .where({
+        duration: req.params.duration
+      }).then(async (data) => {
+        if (data.length >= 1) {
+          res.json({
+            res: data,
+          });
+        } else {
+          res.status(404).send();
+        }
+      });
+  }
+
+});
+
+
 
 //Check Player (id) cheater
 
