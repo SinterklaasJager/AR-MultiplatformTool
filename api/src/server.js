@@ -5,6 +5,9 @@ const Helpers = require('./utils/helpers.js');
 const {
   doesNotMatch
 } = require('assert');
+const {
+  count
+} = require('console');
 
 const port = 3001
 
@@ -45,62 +48,82 @@ app.get('/', async (req, res) => {
 
 app.post('/addGame', async (req, res) => {
 
-    console.log("Added a Game");
+  console.log("Added a Game");
 
-    const uuid = Helpers.generateUUID();
+  const uuid = Helpers.generateUUID();
 
-    const resultGames = await pg
-      .table("games")
-      .insert({
-        uuid: uuid,
-        title: req.body.title,
-        players: req.body.players,
-        winner: req.body.winner,
-        rounds: req.body.rounds,
-        duration: req.body.rounds
-      })
-      .then(async function () {
-        res.status(200).send();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  const AddGame = await pg
+    .table("games")
+    .insert({
+      uuid: uuid,
+      title: req.body.title,
+      rounds: req.body.rounds,
+      duration: req.body.duration
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 
-    const resultPlayers = await pg
-      .table("players")
-      .where()
-      .insert({
-        uuid: uuid,
-        title: req.body.title,
-        players: req.body.players,
-        winner: req.body.winner,
-        rounds: req.body.rounds,
-        duration: req.body.rounds
-      })
-      .then(async function () {
-        res.status(200).send();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-
-    const resultWinner = await pg
-      .table("players")
-      .where({
-        uuid: req.body.winner
-      })
-      .then(async function () {
-        res.status(200).send();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  for (const player of req.body.players) {
+    console.log(player);
+    AddPlayedGame(uuid,player);
   }
 
+  const AddWinner = await pg
+      .table("played_games")
+      .where({
+        Player_ID: req.body.winner
+      })
+      .update({
+        Winner: true
+      })
+      .then(()=>{
+        console.log(`winner ${req.body.winner} has been updated`)
+        res.status(201).send("Game was saved");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  
 
 
 
-);
+
+});
+
+async function AddPlayedGame(uuid, player) {
+  console.log(uuid,player);
+  const AddPlayedGame = await pg
+    .table("played_games")
+    .where()
+    .insert({
+      Game_ID:uuid,
+      Player_ID: player,
+      Winner: false
+    }).catch((error) => {
+      console.log(error);
+    });
+}
+
+
+app.post('/addPlayer', async (req, res) => {
+
+  const uuid = Helpers.generateUUID();
+
+  const resultGames = await pg
+    .table("players")
+    .insert({
+      uuid: uuid
+    })
+    .then(async function () {
+      res.status(200).send();
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
+
+});
 
 
 app.get('/getAllGames', async (req, res) => {
@@ -108,6 +131,7 @@ app.get('/getAllGames', async (req, res) => {
   console.log("get all games");
 
   const result = await pg.select("*").from("games");
+  console.log(result.length);
   res.json({
     res: result,
   });
@@ -123,21 +147,18 @@ app.get('/getGameById/:id', async (req, res) => {
 
   console.log(id);
 
- 
 
   if (!Number.isInteger(id)) {
     canPass = false
   }
 
   if (id < 0 || id > 100000000000) {
-  
+
     canPass = false
   }
 
-  
-
   if (canPass) {
-  
+
     try {
       const result = await pg
         .select("*")
@@ -179,6 +200,15 @@ app.get('/getPlayerById/:id', async (req, res) => {
     });
 });
 
+app.get('/getAllPlayers', async (req, res) => {
+
+  const result = await pg.select("*").from("players");
+  res.json({
+    res: result,
+  });
+
+});
+
 
 app.delete('/deleteGame/:uuid', async (req, res) => {
 
@@ -198,21 +228,48 @@ app.delete('/deleteGame/:uuid', async (req, res) => {
 //        Analyze Data       //
 ///////////////////////////////
 
-//Get player win rate above x%
+app.get('/getWinPercentByPlayer/:id', async (req, res) => {
+
+
+  let totalGames;
+  let WonGames;
+  let result;
+
+  const totalGamesResult = await pg
+    .select("Player_ID")
+    .from('played_games')
+    .where({
+      Player_ID: req.params.id
+    }).then(
+      totalGames = totalGamesResult.length
+    )
+    .catch(() => res.status(400).send());
+
+  const totalWonGamesResult = await pg
+    .select("Player_ID")
+    .from('played_games')
+    .where({
+      Player_ID: req.params.id,
+      winner: true
+    }).then(
+      WonGames = totalWonGamesResult.length
+    )
+    .catch(() => res.status(400).send());
+
+  result = WonGames / totalGames;
+
+  res.send(result);
+
+});
+
+// Get player win rate above x%
 app.get('/getPlayerByWinPercent/percent', async (req, res) => {
 
-  const result = await pg
-    .select("Won_Games", "Played_Games")
+  const players = await pg
+    .select("id")
     .from("players")
-
-  for (const percent of result) {
-    console.log(percent.Won_Games.length / percent.Played_Games.length);
-    const percentages = (percent.Won_Games.length / percent.Played_Games.length) * 100;
-
-    if (percentages >= req.params.percent) {
-      result.push
-    }
-  }
+    .then()
+    .catch(() => res.status(400).send());
 
 
 
@@ -239,7 +296,7 @@ app.get('/getGamesByDuration/:duration', async (req, res) => {
         } else {
           res.status(404).send();
         }
-      });
+      }).catch(() => res.status(400).send());
   }
 
 });
@@ -261,8 +318,7 @@ async function initialiseTables() {
         .createTable('players', (table) => {
           table.increments();
           table.uuid('uuid');
-          table.string('Played_Games');
-          table.string("Won_Games");
+          table.integer('Amount_Of_Games_Played');
           table.timestamps(true, true);
         })
         .then(async () => {
@@ -270,9 +326,7 @@ async function initialiseTables() {
           for (let i = 0; i < 10; i++) {
             const uuid = Helpers.generateUUID();
             await pg.table('players').insert({
-              uuid,
-              Played_Games: ["Game1", "Game2"],
-              Won_Games: ["Game1", "Game2"]
+              uuid
             })
           }
         });
@@ -287,21 +341,37 @@ async function initialiseTables() {
           table.increments();
           table.uuid('uuid');
           table.string('title');
-          table.string('players');
-          table.string('winner');
           table.integer("rounds");
           table.integer("duration");
           table.timestamps(true, true);
         })
         .then(async () => {
           console.log('created table games');
-          for (let i = 0; i < 10; i++) {
-            const uuid = Helpers.generateUUID();
-            await pg.table('games').insert({
-              uuid,
-              title: `random element number ${i}`
-            })
-          }
+          // for (let i = 0; i < 10; i++) {
+          //   const uuid = Helpers.generateUUID();
+          //   await pg.table('games').insert({
+          //     uuid,
+          //     title: `random element number ${i}`
+          //   })
+          // }
+        });
+
+    }
+  });
+
+  await pg.schema.hasTable('played_games').then(async (exists) => {
+    if (!exists) {
+      await pg.schema
+        .createTable('played_games', (table) => {
+          table.increments();
+          table.string('Game_ID');
+          table.string('Player_ID');
+          table.boolean("Winner");
+          table.timestamps(true, true);
+        })
+        .then(async () => {
+          console.log('created table played_games');
+
         });
 
     }

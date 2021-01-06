@@ -30,6 +30,14 @@ describe("get a game by ID", ()=>{
     });
 });
 
+
+describe("Get  win percentage  by Player",() =>{
+    //input can't be empty
+
+    
+});
+
+
 describe("Get Players by minimum win percentage",() =>{
     //percent must between 0 and 100
     //percent is a number
