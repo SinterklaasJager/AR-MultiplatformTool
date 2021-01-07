@@ -17,7 +17,7 @@
   <h3 align="center">AR Multiplatform Tool</h3>
 
   <p align="center">
-    A tool to more easily allow your AR game to share data across platforms, like PC / Mac / desktop.
+    A tool to help you analyze metadata of your Turned-based games.
     <br />
     <a href="https://github.com/wouwehb/AR-MultiPlatformTool"><strong>Explore the docs »</strong></a>
     <br />
@@ -62,28 +62,25 @@
 
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[<img src="data/img/rocket_background.png" alt="rocket_Background" width="400" height="275">](https://i.imgur.com/RF0TXKP.png)
 
-
-
-### Built With
-
-* []()
-* []()
-* []()
+ Automatically hook your game up to the api to automatically perform various checks and analyze post-game data. like notify you of people with unusualy high win rates; are the cheaters, is their build/play-style overpowered? This api is just a frame-work. Feel free to tinker with it to fulfill your every need.
 
 
 ## Getting Started
 
 To get a local copy up and running follow these simple steps.
 
+
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
+You will need the latest version of npm
 * npm
   ```sh
   npm install npm@latest -g
   ```
+
+You will also require your own database
 
 ### Installation
 
@@ -95,15 +92,12 @@ This is an example of how to list things you need to use the software and how to
    ```sh
    npm install
    ```
-
+3. Hook up the api to your game's back-end
 
 
 
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](wouwehb/AR-MultiPlatformTool/documentation)_
 
 
 
@@ -142,8 +136,7 @@ Project Link: [https://github.com/wouwehb/AR-MultiplatformTool](https://github.c
 ## Acknowledgements
 
 * [Tom Verheirstraeten](https://github.com/tomverheirstraeten/easywavespawner)
-* []()
-* []()
+* [Jan Everaert](https://github.com/Everaertjan)
 
 
 
@@ -151,15 +144,15 @@ Project Link: [https://github.com/wouwehb/AR-MultiplatformTool](https://github.c
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/wouwehb/repo.svg?style=for-the-badge
-[contributors-url]: https://github.com/wouwehb/repo/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/wouwehb/repo.svg?style=for-the-badge
-[forks-url]: https://github.com/wouwehb/repo/network/members
-[stars-shield]: https://img.shields.io/github/stars/wouwehb/repo.svg?style=for-the-badge
-[stars-url]: https://github.com/wouwehb/repo/stargazers
-[issues-shield]: https://img.shields.io/github/issues/wouwehb/repo.svg?style=for-the-badge
-[issues-url]: https://github.com/wouwehb/repo/issues
-[license-shield]: https://img.shields.io/github/license/wouwehb/repo.svg?style=for-the-badge
-[license-url]: https://github.com/wouwehb/repo/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/wouwehb/AR-MultiplatformTool.svg?style=for-the-badge
+[contributors-url]: https://github.com/wouwehb/AR-MultiplatformTool/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/wouwehb/AR-MultiplatformTool.svg?style=for-the-badge
+[forks-url]: https://github.com/wouwehb/AR-MultiplatformTool/network/members
+[stars-shield]: https://img.shields.io/github/stars/wouwehb/AR-MultiplatformTool.svg?style=for-the-badge
+[stars-url]: https://github.com/wouwehb/AR-MultiplatformTool/stargazers
+[issues-shield]: https://img.shields.io/github/issues/wouwehb/AR-MultiplatformTool.svg?style=for-the-badge
+[issues-url]: https://github.com/wouwehb/AR-MultiplatformTool/issues
+[license-shield]: https://img.shields.io/github/license/wouwehb/AR-MultiplatformTool.svg?style=for-the-badge
+[license-url]: https://github.com/wouwehb/AR-MultiplatformTool/blob/main/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/wouwehb
