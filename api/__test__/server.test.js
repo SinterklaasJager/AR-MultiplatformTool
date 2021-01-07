@@ -47,16 +47,33 @@ describe("Get Players by minimum win percentage",() =>{
 });
 
 describe("Get Games made during x time period",()=>{
+
     //time period must be correct format
-    //input can't be empty 
-    //if return is empty give error message
-    //if return is empty give error message
+
+
+
 });
 
 describe("get games that ended after x seconds",()=>{
-    //input can't be empty
-    //input must be an integer
-    //absolute integer value can not be larger than max integer value
-    //if return is empty give error message
+        test("is an integer" , async (done) =>{
+        try {
+            const response = await request.get('/getGamesByDuration/%%%"')
+            expect(response.status).toBe(400)
+            done();
+        } catch (error) {
+            console.log(error)
+        }
+    });
+
+
+    test("value needs to be on db" , async (done) =>{
+        try {
+            const response = await request.get('/getGamesByDuration/900')
+            expect(response.status).toBe(404)
+            done();
+        } catch (error) {
+            console.log(error)
+        }
+    });
 
 });

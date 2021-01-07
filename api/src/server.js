@@ -72,10 +72,10 @@ app.post('/addGame', async (req, res) => {
   const AddWinner = await pg
       .table("played_games")
       .where({
-        Player_ID: req.body.winner
+        player_id: req.body.winner
       })
       .update({
-        Winner: true
+        winner: true
       })
       .then(()=>{
         console.log(`winner ${req.body.winner} has been updated`)
@@ -97,9 +97,9 @@ async function AddPlayedGame(uuid, player) {
     .table("played_games")
     .where()
     .insert({
-      Game_ID:uuid,
-      Player_ID: player,
-      Winner: false
+      game_id:uuid,
+      player_id: player,
+      winner: false
     }).catch((error) => {
       console.log(error);
     });
@@ -236,20 +236,20 @@ app.get('/getWinPercentByPlayer/:id', async (req, res) => {
   let result;
 
   const totalGamesResult = await pg
-    .select("Player_ID")
+    .select("player_id")
     .from('played_games')
     .where({
-      Player_ID: req.params.id
+      player_id: req.params.id
     }).then(
       totalGames = totalGamesResult.length
     )
     .catch(() => res.status(400).send());
 
   const totalWonGamesResult = await pg
-    .select("Player_ID")
+    .select("player_id")
     .from('played_games')
     .where({
-      Player_ID: req.params.id,
+      player_id: req.params.id,
       winner: true
     }).then(
       WonGames = totalWonGamesResult.length
@@ -280,14 +280,18 @@ app.get('/getPlayerByWinPercent/percent', async (req, res) => {
 //get all games with duration below x min
 app.get('/getGamesByDuration/:duration', async (req, res) => {
 
-  if (req.params.duration === "" || req.params.duration === null || req.params.duration != Number.isInteger) {
-    res.status(400);
+  let duration = parseInt(req.params.duration);
+
+  console.log("duration: " + duration);
+
+  if (isNaN(duration) || duration === null || !Number.isInteger(duration)) {
+    res.status(404).send();;
   } else {
     const result = await pg
       .select("*")
       .from("games")
       .where({
-        duration: req.params.duration
+        duration: duration
       }).then(async (data) => {
         if (data.length >= 1) {
           res.json({
@@ -318,7 +322,6 @@ async function initialiseTables() {
         .createTable('players', (table) => {
           table.increments();
           table.uuid('uuid');
-          table.integer('Amount_Of_Games_Played');
           table.timestamps(true, true);
         })
         .then(async () => {
@@ -364,9 +367,9 @@ async function initialiseTables() {
       await pg.schema
         .createTable('played_games', (table) => {
           table.increments();
-          table.string('Game_ID');
-          table.string('Player_ID');
-          table.boolean("Winner");
+          table.string('game_id');
+          table.string('player_id');
+          table.boolean("winner");
           table.timestamps(true, true);
         })
         .then(async () => {
