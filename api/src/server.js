@@ -8,6 +8,7 @@ const {
 const {
   count
 } = require('console');
+const { isString } = require('util');
 
 const port = 3001
 
@@ -66,25 +67,25 @@ app.post('/addGame', async (req, res) => {
 
   for (const player of req.body.players) {
     console.log(player);
-    AddPlayedGame(uuid,player);
+    AddPlayedGame(uuid, player);
   }
 
   const AddWinner = await pg
-      .table("played_games")
-      .where({
-        player_id: req.body.winner
-      })
-      .update({
-        winner: true
-      })
-      .then(()=>{
-        console.log(`winner ${req.body.winner} has been updated`)
-        res.status(201).send("Game was saved");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  
+    .table("played_games")
+    .where({
+      player_id: req.body.winner
+    })
+    .update({
+      winner: true
+    })
+    .then(() => {
+      console.log(`winner ${req.body.winner} has been updated`)
+      res.status(201).send("Game was saved");
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
 
 
 
@@ -92,12 +93,12 @@ app.post('/addGame', async (req, res) => {
 });
 
 async function AddPlayedGame(uuid, player) {
-  console.log(uuid,player);
+  console.log(uuid, player);
   const AddPlayedGame = await pg
     .table("played_games")
     .where()
     .insert({
-      game_id:uuid,
+      game_id: uuid,
       player_id: player,
       winner: false
     }).catch((error) => {
@@ -215,11 +216,15 @@ app.delete('/deleteGame/:uuid', async (req, res) => {
   console.log("delete game");
 
 
-  const result = await pg.from("games").where({
+  const result = await pg
+  .from("games")
+  .where({
     uuid: req.params.uuid
-  }).del().then((data) => {
+  })
+  .del().then((data) => {
     res.json(data);
-  }).catch(() => res.status(404).send());
+  })
+  .catch(() => res.status(404).send());
 
 });
 
@@ -230,7 +235,10 @@ app.delete('/deleteGame/:uuid', async (req, res) => {
 
 app.get('/getWinPercentByPlayer/:id', async (req, res) => {
 
+if(req.params.id ==="" || req.params.id === null || req.params.id ===" " || typeof req.params.id !== "string" || req.params.id.includes(";")|| req.params.id.includes("'")|| req.params.id.includes('"')){
+res.sendStatus(400);
 
+}else{
   let totalGames;
   let WonGames;
   let result;
@@ -240,10 +248,14 @@ app.get('/getWinPercentByPlayer/:id', async (req, res) => {
     .from('played_games')
     .where({
       player_id: req.params.id
-    }).then(
-      totalGames = totalGamesResult.length
-    )
-    .catch(() => res.status(400).send());
+    }).then(async (data) => {
+      totalGames = data.length
+    })
+     
+    .catch((error) => {
+      console.log(error);
+    });
+
 
   const totalWonGamesResult = await pg
     .select("player_id")
@@ -251,14 +263,22 @@ app.get('/getWinPercentByPlayer/:id', async (req, res) => {
     .where({
       player_id: req.params.id,
       winner: true
-    }).then(
-      WonGames = totalWonGamesResult.length
-    )
-    .catch(() => res.status(400).send());
+    }).then(async (data) => {
+      WonGames = data.length
+      result = WonGames / totalGames;
+      res.json({
+        winrate: result,
+      });
+    
+    })
+     
+    .catch((error) => {
+      console.log(error);
+    });
+}
 
-  result = WonGames / totalGames;
+  
 
-  res.send(result);
 
 });
 
@@ -304,11 +324,6 @@ app.get('/getGamesByDuration/:duration', async (req, res) => {
   }
 
 });
-
-
-
-//Check Player (id) cheater
-
 
 ///////////////////////////////
 //       Create Tables       //

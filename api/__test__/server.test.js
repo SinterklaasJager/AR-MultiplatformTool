@@ -32,7 +32,26 @@ describe("get a game by ID", ()=>{
 
 
 describe("Get  win percentage  by Player",() =>{
-    //input can't be empty
+    
+    test("no funny business" , async (done) =>{
+        try {
+            const response = await request.get('/getWinPercentByPlayer/"DROP_TABLES();')
+            expect(response.status).toBe(400)
+            done();
+        } catch (error) {
+            console.log(error)
+        }
+    });
+
+    test("not an  empty string" , async (done) =>{
+        try {
+            const response = await request.get('/getWinPercentByPlayer/" "')
+            expect(response.status).toBe(400)
+            done();
+        } catch (error) {
+            console.log(error)
+        }
+    });
 
     
 });
