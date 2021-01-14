@@ -5,6 +5,13 @@ const Helpers = {
      return uuidv4();  
          
      },
+     specialCharacter: (input)=>{
+        if(input.includes(";")|| input.includes("'")|| input.includes('"')|| input.includes("`")|| input.includes(">")|| input.includes("<")){
+            return true
+        }else{
+            return false
+        }
+     },
     sum: (a,b) => { 
         return a+b;
      }
