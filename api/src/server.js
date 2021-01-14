@@ -93,7 +93,7 @@ app.post('/addGame', async (req, res) => {
 });
 
 async function AddPlayedGame(uuid, player) {
-  console.log(uuid, player);
+
   const AddPlayedGame = await pg
     .table("played_games")
     .where()
@@ -105,7 +105,6 @@ async function AddPlayedGame(uuid, player) {
       console.log(error);
     });
 }
-
 
 app.post('/addPlayer', async (req, res) => {
 
@@ -132,7 +131,6 @@ app.get('/getAllGames', async (req, res) => {
   console.log("get all games");
 
   const result = await pg.select("*").from("games");
-  console.log(result.length);
   res.json({
     res: result,
   });
@@ -146,8 +144,10 @@ app.get('/getGameById/:id', async (req, res) => {
   let canPass = true;
   let id = parseInt(req.params.id);
 
-  console.log(id);
 
+  if(Helpers.specialCharacter(req.params.id)){
+    canPass = false
+  }
 
   if (!Number.isInteger(id)) {
     canPass = false
@@ -177,15 +177,17 @@ app.get('/getGameById/:id', async (req, res) => {
     }
 
   } else {
-    console.log("Can Pass = " + canPass);
-    res.status(400).send();
+    res.sendStatus(400);
   }
 });
 
 
 app.get('/getPlayerById/:id', async (req, res) => {
 
-  const result = await pg
+  if(Helpers.specialCharacter(req.params.id)){
+    res.sendStatus(400);
+  }else{
+      const result = await pg
     .select("*")
     .from("games")
     .where({
@@ -199,6 +201,8 @@ app.get('/getPlayerById/:id', async (req, res) => {
         res.status(404).send();
       }
     });
+  }
+
 });
 
 app.get('/getAllPlayers', async (req, res) => {
@@ -215,8 +219,10 @@ app.delete('/deleteGame/:uuid', async (req, res) => {
 
   console.log("delete game");
 
-
-  const result = await pg
+  if(Helpers.specialCharacter(req.params.uuid)){
+    res.sendStatus(400);
+  }else{
+      const result = await pg
   .from("games")
   .where({
     uuid: req.params.uuid
@@ -225,6 +231,7 @@ app.delete('/deleteGame/:uuid', async (req, res) => {
     res.json(data);
   })
   .catch(() => res.status(404).send());
+  }
 
 });
 
@@ -235,7 +242,7 @@ app.delete('/deleteGame/:uuid', async (req, res) => {
 
 app.get('/getWinPercentByPlayer/:id', async (req, res) => {
 
-if(req.params.id ==="" || req.params.id === null || req.params.id ===" " || typeof req.params.id !== "string" || req.params.id.includes(";")|| req.params.id.includes("'")|| req.params.id.includes('"')){
+if( Helpers.specialCharacter(req.params.id) || req.params.id === null || req.params.id ===" " || typeof req.params.id !== "string"){
 res.sendStatus(400);
 
 }else{
@@ -365,13 +372,6 @@ async function initialiseTables() {
         })
         .then(async () => {
           console.log('created table games');
-          // for (let i = 0; i < 10; i++) {
-          //   const uuid = Helpers.generateUUID();
-          //   await pg.table('games').insert({
-          //     uuid,
-          //     title: `random element number ${i}`
-          //   })
-          // }
         });
 
     }
