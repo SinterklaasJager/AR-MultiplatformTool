@@ -2,14 +2,16 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const http = require('http');
 const Helpers = require('./utils/helpers.js');
-const cors = require ("cors");
+const cors = require("cors");
 const {
   doesNotMatch
 } = require('assert');
 const {
   count
 } = require('console');
-const { isString } = require('util');
+const {
+  isString
+} = require('util');
 
 const port = 3001
 
@@ -39,6 +41,12 @@ app.get('/test', (req, res) => {
   res.status(200).send();
 });
 
+/**
+ * returns html file with possible connections
+ * @param: none
+ * @returns: root.html
+ */
+
 app.get('/', async (req, res) => {
 
   res.sendFile(__dirname + '/root.html');
@@ -48,6 +56,12 @@ app.get('/', async (req, res) => {
 ///////////////////////////////
 //    Handle Incoming Data   //
 ///////////////////////////////
+
+/**
+ * Adds a game
+ * @param: body with uuid, title, players, the winner, rounds and duration
+ * @returns: uuid of game
+ */
 
 app.post('/addGame', async (req, res) => {
 
@@ -82,16 +96,13 @@ app.post('/addGame', async (req, res) => {
     })
     .then(() => {
       console.log(`winner ${req.body.winner} has been updated`)
-      res.status(201).send({uuid:uuid});
+      res.status(201).send({
+        uuid: uuid
+      });
     })
     .catch((error) => {
       console.log(error);
     });
-
-
-
-
-
 });
 
 async function AddPlayedGame(uuid, player) {
@@ -108,6 +119,12 @@ async function AddPlayedGame(uuid, player) {
     });
 }
 
+/**
+ * add a player
+ * @param: none
+ * @returns: player uuid
+ */
+
 app.post('/addPlayer', async (req, res) => {
 
   const uuid = Helpers.generateUUID();
@@ -118,15 +135,21 @@ app.post('/addPlayer', async (req, res) => {
       uuid: uuid
     })
     .then(async function () {
-      res.status(200).send({uuid: uuid});
+      res.status(200).send({
+        uuid: uuid
+      });
     })
     .catch((error) => {
       console.log(error);
     });
-
-
 });
 
+
+/**
+ * get all games
+ * @param: none
+ * @returns: json with all games
+ */
 
 app.get('/getAllGames', async (req, res) => {
 
@@ -140,6 +163,11 @@ app.get('/getAllGames', async (req, res) => {
 });
 
 
+/**
+ * get a specific game by id
+ * @param: id
+ * @returns: game with id = param.body.id
+ */
 
 app.get('/getGameById/:id', async (req, res) => {
 
@@ -147,7 +175,7 @@ app.get('/getGameById/:id', async (req, res) => {
   let id = parseInt(req.params.id);
 
 
-  if(Helpers.specialCharacter(req.params.id)){
+  if (Helpers.specialCharacter(req.params.id)) {
     canPass = false
   }
 
@@ -183,12 +211,18 @@ app.get('/getGameById/:id', async (req, res) => {
   }
 });
 
+/**
+ * get a specific game by uuid
+ * @param: uuid
+ * @returns: game with uuid = param.body.uuid
+ */
+
 app.get('/getGameByUUID/:uuid', async (req, res) => {
 
   let canPass = true;
 
 
-  if(Helpers.specialCharacter(req.params.uuid)){
+  if (Helpers.specialCharacter(req.params.uuid)) {
     canPass = false
   }
   if (canPass) {
@@ -213,29 +247,40 @@ app.get('/getGameByUUID/:uuid', async (req, res) => {
   }
 });
 
+/**
+ * get a specific player by uuid
+ * @param: uuid
+ * @returns: a player with uuid = param.body.uuid
+ */
 
 app.get('/getPlayerById/:id', async (req, res) => {
 
-  if(Helpers.specialCharacter(req.params.id)){
+  if (Helpers.specialCharacter(req.params.id)) {
     res.sendStatus(400);
-  }else{
-      const result = await pg
-    .select("*")
-    .from("players")
-    .where({
-      uuid: req.params.id
-    }).then(async (data) => {
-      if (data.length >= 1) {
-        res.json({
-          res: data,
-        });
-      } else {
-        res.status(404).send();
-      }
-    });
+  } else {
+    const result = await pg
+      .select("*")
+      .from("players")
+      .where({
+        uuid: req.params.id
+      }).then(async (data) => {
+        if (data.length >= 1) {
+          res.json({
+            res: data,
+          });
+        } else {
+          res.status(404).send();
+        }
+      });
   }
-
+  
 });
+
+/**
+ * get all players
+ * @param: none
+ * @returns: json with all players on the database
+ */
 
 app.get('/getAllPlayers', async (req, res) => {
 
@@ -246,43 +291,54 @@ app.get('/getAllPlayers', async (req, res) => {
 
 });
 
+/**
+ * delete a game by uuid
+ * @param: uuid
+ * @returns: status code
+ */
 
 app.delete('/deleteGame/:uuid', async (req, res) => {
 
   console.log("delete game");
 
-  if(Helpers.specialCharacter(req.params.uuid)){
+  if (Helpers.specialCharacter(req.params.uuid)) {
     res.sendStatus(400);
-  }else{
-      const result = await pg
-  .from("games")
-  .where({
-    uuid: req.params.uuid
-  })
-  .del().then((data) => {
-    res.json(data);
-  })
-  .catch(() => res.status(404).send());
+  } else {
+    const result = await pg
+      .from("games")
+      .where({
+        uuid: req.params.uuid
+      })
+      .del().then((data) => {
+        res.json(data);
+      })
+      .catch(() => res.status(404).send());
   }
 
 });
+
+/**
+ * delete a player by uuid
+ * @param: uuid
+ * @returns: status code
+ */
 
 app.delete('/deletePlayer/:uuid', async (req, res) => {
 
   console.log("delete game");
 
-  if(Helpers.specialCharacter(req.params.uuid)){
+  if (Helpers.specialCharacter(req.params.uuid)) {
     res.sendStatus(400);
-  }else{
-      const result = await pg
-  .from("players")
-  .where({
-    uuid: req.params.uuid
-  })
-  .del().then((data) => {
-    res.json(data);
-  })
-  .catch(() => res.status(404).send());
+  } else {
+    const result = await pg
+      .from("players")
+      .where({
+        uuid: req.params.uuid
+      })
+      .del().then((data) => {
+        res.json(data);
+      })
+      .catch(() => res.status(404).send());
   }
 
 });
@@ -292,82 +348,78 @@ app.delete('/deletePlayer/:uuid', async (req, res) => {
 //        Analyze Data       //
 ///////////////////////////////
 
+
+/**
+ * calculate win percent by player
+ * @param: uuid
+ * @returns: float with value between 0-10
+ */
+
 app.get('/getWinPercentByPlayer/:id', async (req, res) => {
 
-if( Helpers.specialCharacter(req.params.id) || req.params.id === null || req.params.id ===" " || typeof req.params.id !== "string"){
-res.sendStatus(400);
+  if (Helpers.specialCharacter(req.params.id) || req.params.id === null || req.params.id === " " || typeof req.params.id !== "string") {
+    res.sendStatus(400);
 
-}else{
-  let totalGames;
-  let WonGames;
-  let result;
+  } else {
+    let totalGames;
+    let WonGames;
+    let result;
 
-  const totalGamesResult = await pg
-    .select("player_id")
-    .from('played_games')
-    .where({
-      player_id: req.params.id
-    }).then(async (data) => {
-      totalGames = data.length
-    })
-     
-    .catch((error) => {
-      console.log(error);
-    });
+    const totalGamesResult = await pg
+      .select("player_id")
+      .from('played_games')
+      .where({
+        player_id: req.params.id
+      }).then(async (data) => {
+        totalGames = data.length
+      })
 
-
-  const totalWonGamesResult = await pg
-    .select("player_id")
-    .from('played_games')
-    .where({
-      player_id: req.params.id,
-      winner: true
-    }).then(async (data) => {
-      WonGames = data.length
-      if(totalGames!=0||wonGames===0){
-          result = WonGames / totalGames;
-      
-      }else{
-        result = 0;
-      }
-      
-      if(result !=null){
-        res.json({
-        winrate: result,
+      .catch((error) => {
+        console.log(error);
       });
-      }else{
-        res.json({
-          winrate: 0,
-        }); 
-      }
-      
-     
-    })
-     
-    .catch((error) => {
-      console.log(error);
-    });
-}
 
-  
+
+    const totalWonGamesResult = await pg
+      .select("player_id")
+      .from('played_games')
+      .where({
+        player_id: req.params.id,
+        winner: true
+      }).then(async (data) => {
+        WonGames = data.length
+        if (totalGames != 0 || wonGames === 0) {
+          result = WonGames / totalGames;
+
+        } else {
+          result = 0;
+        }
+
+        if (result != null) {
+          res.json({
+            winrate: result,
+          });
+        } else {
+          res.json({
+            winrate: 0,
+          });
+        }
+
+
+      })
+
+      .catch((error) => {
+        console.log(error);
+      });
+  }
 
 
 });
 
-// Get player win rate above x%
-app.get('/getPlayerByWinPercent/percent', async (req, res) => {
-
-  const players = await pg
-    .select("id")
-    .from("players")
-    .then()
-    .catch(() => res.status(400).send());
-
-
-
-});
-
-//get all games over time period
+/**
+ * get games with a duration lower than x in seconds
+ * @param: duration 
+ * @returns: list of games who fullfill the criterea.
+ */
 
 //get all games with duration below x min
 app.get('/getGamesByDuration/:duration', async (req, res) => {
