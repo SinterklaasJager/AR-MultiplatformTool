@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser');
 const http = require('http');
 const Helpers = require('./utils/helpers.js');
+const cors = require ("cors");
 const {
   doesNotMatch
 } = require('assert');
@@ -23,7 +24,7 @@ const pg = require('knex')({
 
 const app = express();
 http.Server(app);
-
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(
@@ -31,6 +32,7 @@ app.use(
     extended: true
   })
 );
+
 
 app.get('/test', (req, res) => {
 
@@ -235,6 +237,26 @@ app.delete('/deleteGame/:uuid', async (req, res) => {
 
 });
 
+app.delete('/deletePlayer/:uuid', async (req, res) => {
+
+  console.log("delete game");
+
+  if(Helpers.specialCharacter(req.params.uuid)){
+    res.sendStatus(400);
+  }else{
+      const result = await pg
+  .from("players")
+  .where({
+    uuid: req.params.uuid
+  })
+  .del().then((data) => {
+    res.json(data);
+  })
+  .catch(() => res.status(404).send());
+  }
+
+});
+
 
 ///////////////////////////////
 //        Analyze Data       //
@@ -343,7 +365,7 @@ async function initialiseTables() {
       await pg.schema
         .createTable('players', (table) => {
           table.increments();
-          table.uuid('uuid');
+          table.uuid('uuid').notNullable().unique();
           table.timestamps(true, true);
         })
         .then(async () => {
@@ -354,17 +376,19 @@ async function initialiseTables() {
               uuid
             })
           }
-        });
-
+        }).catch((error) => {
+          console.log(error);
+        });;
 
     }
   });
+
   await pg.schema.hasTable('games').then(async (exists) => {
     if (!exists) {
       await pg.schema
         .createTable('games', (table) => {
           table.increments();
-          table.uuid('uuid');
+          table.uuid('uuid').notNullable().unique();
           table.string('title');
           table.integer("rounds");
           table.integer("duration");
@@ -372,6 +396,9 @@ async function initialiseTables() {
         })
         .then(async () => {
           console.log('created table games');
+        })
+        .catch((error) => {
+          console.log(error);
         });
 
     }
@@ -382,14 +409,16 @@ async function initialiseTables() {
       await pg.schema
         .createTable('played_games', (table) => {
           table.increments();
-          table.string('game_id');
-          table.string('player_id');
+          table.uuid('game_id').unsigned().references("uuid").inTable("games").onDelete("CASCADE").onUpdate("CASCADE");
+          table.uuid('player_id').unsigned().references("uuid").inTable("players").onDelete("CASCADE").onUpdate("CASCADE");
           table.boolean("winner");
           table.timestamps(true, true);
         })
         .then(async () => {
           console.log('created table played_games');
 
+        }).catch((error) => {
+          console.log(error);
         });
 
     }
