@@ -82,7 +82,7 @@ app.post('/addGame', async (req, res) => {
     })
     .then(() => {
       console.log(`winner ${req.body.winner} has been updated`)
-      res.status(201).send("Game was saved");
+      res.status(201).send({uuid:uuid});
     })
     .catch((error) => {
       console.log(error);
@@ -118,7 +118,7 @@ app.post('/addPlayer', async (req, res) => {
       uuid: uuid
     })
     .then(async function () {
-      res.status(200).send();
+      res.status(200).send({uuid: uuid});
     })
     .catch((error) => {
       console.log(error);
@@ -183,6 +183,36 @@ app.get('/getGameById/:id', async (req, res) => {
   }
 });
 
+app.get('/getGameByUUID/:uuid', async (req, res) => {
+
+  let canPass = true;
+
+
+  if(Helpers.specialCharacter(req.params.uuid)){
+    canPass = false
+  }
+  if (canPass) {
+    try {
+      const result = await pg
+        .select("*")
+        .from("games")
+        .where({
+          uuid: req.params.uuid
+        })
+      if (result.length < 1) {
+        res.status(404).send();
+      } else {
+        res.status(200).send(result);
+      }
+    } catch (error) {
+      res.send(error);
+    }
+
+  } else {
+    res.sendStatus(400);
+  }
+});
+
 
 app.get('/getPlayerById/:id', async (req, res) => {
 
@@ -191,9 +221,9 @@ app.get('/getPlayerById/:id', async (req, res) => {
   }else{
       const result = await pg
     .select("*")
-    .from("games")
+    .from("players")
     .where({
-      id: req.params.id
+      uuid: req.params.id
     }).then(async (data) => {
       if (data.length >= 1) {
         res.json({
@@ -294,11 +324,24 @@ res.sendStatus(400);
       winner: true
     }).then(async (data) => {
       WonGames = data.length
-      result = WonGames / totalGames;
-      res.json({
+      if(totalGames!=0||wonGames===0){
+          result = WonGames / totalGames;
+      
+      }else{
+        result = 0;
+      }
+      
+      if(result !=null){
+        res.json({
         winrate: result,
       });
-    
+      }else{
+        res.json({
+          winrate: 0,
+        }); 
+      }
+      
+     
     })
      
     .catch((error) => {
