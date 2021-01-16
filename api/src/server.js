@@ -253,16 +253,16 @@ app.get('/getGameByUUID/:uuid', async (req, res) => {
  * @returns: a player with uuid = param.body.uuid
  */
 
-app.get('/getPlayerById/:id', async (req, res) => {
+app.get('/getPlayerById/:uuid', async (req, res) => {
 
-  if (Helpers.specialCharacter(req.params.id)) {
+  if (Helpers.specialCharacter(req.params.uuid)) {
     res.sendStatus(400);
   } else {
     const result = await pg
       .select("*")
       .from("players")
       .where({
-        uuid: req.params.id
+        uuid: req.params.uuid
       }).then(async (data) => {
         if (data.length >= 1) {
           res.json({
@@ -273,7 +273,7 @@ app.get('/getPlayerById/:id', async (req, res) => {
         }
       });
   }
-  
+
 });
 
 /**
@@ -355,9 +355,9 @@ app.delete('/deletePlayer/:uuid', async (req, res) => {
  * @returns: float with value between 0-10
  */
 
-app.get('/getWinPercentByPlayer/:id', async (req, res) => {
+app.get('/getWinPercentByPlayer/:uuid', async (req, res) => {
 
-  if (Helpers.specialCharacter(req.params.id) || req.params.id === null || req.params.id === " " || typeof req.params.id !== "string") {
+  if (Helpers.specialCharacter(req.params.uuid) || req.params.uuid === null || req.params.uuid === " " || typeof req.params.uuid !== "string") {
     res.sendStatus(400);
 
   } else {
@@ -369,7 +369,7 @@ app.get('/getWinPercentByPlayer/:id', async (req, res) => {
       .select("player_id")
       .from('played_games')
       .where({
-        player_id: req.params.id
+        player_id: req.params.uuid
       }).then(async (data) => {
         totalGames = data.length
       })
@@ -383,7 +383,7 @@ app.get('/getWinPercentByPlayer/:id', async (req, res) => {
       .select("player_id")
       .from('played_games')
       .where({
-        player_id: req.params.id,
+        player_id: req.params.uuid,
         winner: true
       }).then(async (data) => {
         WonGames = data.length
@@ -495,8 +495,8 @@ async function initialiseTables() {
         .catch((error) => {
           console.log(error);
         });
-
     }
+    
   });
 
   await pg.schema.hasTable('played_games').then(async (exists) => {
